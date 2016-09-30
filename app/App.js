@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {Container} from 'flux/utils';
 import ReactDOM from 'react-dom';
 import BankBalanceStore from './BankBalanceStore';
 import BankActions from './BankActions';
@@ -7,41 +8,26 @@ class App extends Component {
   constructor() {
     super(...arguments);
     BankActions.createAccount();
-    this.state = {
+  }
+
+  static getStores() {
+    return [BankBalanceStore];
+  }
+
+  static calculateState(prevState) {
+    return {
       balance: BankBalanceStore.getState()
     }
   }
 
-  componentDidMount() { //addListener handles component state changes callback, and returns Dispatch token, using which we can dispose listener component will unmount
-    this.storeSubscription = BankBalanceStore.addListener(() => this.handleStorageChange());
-  }
-
-  componentWillUnmount() {
-    this
-      .storeSubscription
-      .remove();
-  }
-
-  handleStorageChange() {
-    this.setState({
-      balance: BankBalanceStore.getState()
-    });
-  }
-
   deposit() { //button action deposit
-
     BankActions.depositIntoAccount(Number(this.refs.ammount.value));
-
     this.refs.ammount.value = '';
-
   }
 
   withdraw() { //button action withdraw
-
     BankActions.withdrawFromAccount(Number(this.refs.ammount.value));
-
     this.refs.ammount.value = '';
-
   }
 
   render() {
@@ -64,5 +50,7 @@ class App extends Component {
   }
 }
 
+const AppContainer = Container.create(App);
+
 ReactDOM.render(
-  <App/>, document.getElementById('root'));
+  <AppContainer/>, document.getElementById('root'));
