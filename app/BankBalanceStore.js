@@ -1,47 +1,41 @@
-import {EventEmitter} from 'fbemitter';
+import {Store} from 'flux/utils';
 import AppDispatcher from './AppDispatcher';
 import bankConstants from './constants';
 
-const CHANGE_EVENT = 'change'; //change event to emit
-
-let __emitter = new EventEmitter();
 let balance = 0; //stored value
 
-let BankBalanceStore = {
+class BankBalanceStore extends Store {
 
     getState() { //getter for the stored value
         return balance;
-    },
-
-    addListener: (callback) => {
-        return __emitter.addListener(CHANGE_EVENT, callback);
-    }
-};
-
-BankBalanceStore.dispatchToken = AppDispatcher.register((action) => { //AppDispatcher returns dispatchToken
-    //actions consist of type and optional data payload, in our case, it is ammount number
-    switch (action.type) {
-        case bankConstants.CREATED_ACCOUNT:
-            {
-                balance = 0;
-                __emitter.emit(CHANGE_EVENT) //each time stored value changes emit method should be emitted with change event
-            }
-            break;
-        case bankConstants.DEPOSITED_INTO_ACCOUNT:
-            {
-                balance = balance + action.ammount;
-                __emitter.emit(CHANGE_EVENT);
-            }
-            break;
-        case bankConstants.WITHDREW_FROM_ACCOUNT:
-            {
-                balance = balance - action.ammount;
-                __emitter.emit(CHANGE_EVENT);
-            }
-            break;
-
     }
 
-});
+    //onDispatch method must be overriden
+    __onDispatch(action) {
+        //actions consist of type and optional data payload, in our case, it is ammount number
+        switch (action.type) {
+            case bankConstants.CREATED_ACCOUNT:
+                {
+                    balance = 0;
+                    this.__emitChange(); //each time stored value changes emitChange method should be invoked
+                }
+                break;
+            case bankConstants.DEPOSITED_INTO_ACCOUNT:
+                {
+                    balance = balance + action.ammount;
+                    this.__emitChange()
+                }
+                break;
+            case bankConstants.WITHDREW_FROM_ACCOUNT:
+                {
+                    balance = balance - action.ammount;
+                    this.__emitChange()
+                }
+                break;
 
-export default BankBalanceStore;
+        }
+
+    };
+}
+
+export default new BankBalanceStore(AppDispatcher); //export of instance of Store Util class, passing desired Dispathcer as an argument

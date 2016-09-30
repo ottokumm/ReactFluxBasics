@@ -12,8 +12,8 @@ class App extends Component {
     }
   }
 
-  componentDidMount() {
-    this.storeSubscription = BankBalanceStore.addListener(data => this.handleStorageChange(data));
+  componentDidMount() { //addListener handles component state changes callback, and returns Dispatch token, using which we can dispose listener component will unmount
+    this.storeSubscription = BankBalanceStore.addListener(() => this.handleStorageChange());
   }
 
   componentWillUnmount() {
